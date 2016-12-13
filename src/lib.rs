@@ -37,7 +37,6 @@
 #![deny(missing_docs)]
 #![no_std]
 
-use core::cell::UnsafeCell;
 use core::ptr;
 
 /// Read-Only register
@@ -90,7 +89,7 @@ impl<T> RW<T>
 /// Write-Only register
 #[repr(C)]
 pub struct WO<T> {
-    register: UnsafeCell<T>,
+    register: T,
 }
 
 impl<T> WO<T>
@@ -98,8 +97,10 @@ impl<T> WO<T>
 {
     /// Uninterruptible if `T` is a word, halfword or byte
     #[inline(always)]
-    pub fn write(&self, value: T) {
-        unsafe { ptr::write_volatile(self.register.get(), value) }
+    pub fn write(&mut self, value: T) {
+        unsafe {
+            ptr::write_volatile(&mut self.register, value);
+        }
     }
 }
 
